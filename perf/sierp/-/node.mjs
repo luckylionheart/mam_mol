@@ -1154,7 +1154,7 @@ var $;
             this.row = row;
             this.col = col;
             this.length = length;
-            this[Symbol.toStringTag] = `${this.uri}#${this.row}:${this.col}/${this.length}`;
+            this[Symbol.toStringTag] = this.uri + ('#' + this.row + ':' + this.col + '/' + this.length);
         }
         static unknown = $mol_span.begin('?');
         static begin(uri, source = '') {
@@ -1650,7 +1650,8 @@ var $;
                         break reuse;
                     return existen;
                 }
-                const next = new $mol_wire_task(`${host?.[Symbol.toStringTag] ?? host}.${task.name}<#>`, task, host, args);
+                const key = (host?.[Symbol.toStringTag] ?? host) + ('.' + task.name + '<#>');
+                const next = new $mol_wire_task(key, task, host, args);
                 if (existen?.temp) {
                     $$.$mol_log3_warn({
                         place: '$mol_wire_task',
@@ -1767,7 +1768,7 @@ var $;
             if (existen)
                 return existen;
             const prefix = host?.[Symbol.toStringTag] ?? (host instanceof Function ? $$.$mol_func_name(host) : host);
-            const key = `${prefix}.${field}`;
+            const key = prefix + ('.' + field);
             const fiber = new $mol_wire_atom(key, task, host, []);
             (host ?? task)[field] = fiber;
             return fiber;
@@ -1785,7 +1786,7 @@ var $;
             else {
                 dict = (host ?? task)[field] = new Map();
             }
-            const id = `${prefix}.${task.name}<${key_str.replace(/^"|"$/g, "'")}>`;
+            const id = prefix + ('.' + task.name) + ('<' + key_str.replace(/^"|"$/g, "'") + '>');
             const fiber = new $mol_wire_atom(id, task, host, [key]);
             dict.set(key_str, fiber);
             return fiber;
@@ -1990,30 +1991,26 @@ var $node = new Proxy({ require }, {
             return target.require(name);
         if (name[0] === '.')
             return target.require(name);
-        const path = target.require('path');
-        const fs = target.require('fs');
-        let dir = path.resolve('.');
-        const suffix = `./node_modules/${name}`;
-        const $$ = $;
-        while (!fs.existsSync(path.join(dir, suffix))) {
-            const parent = path.resolve(dir, '..');
-            if (parent === dir) {
-                $$.$mol_exec('.', 'npm', 'install', '--omit=dev', name);
-                try {
-                    $$.$mol_exec('.', 'npm', 'install', '--omit=dev', '@types/' + name);
-                }
-                catch { }
-                break;
+        try {
+            target.require.resolve(name);
+        }
+        catch {
+            const $$ = $;
+            $$.$mol_exec('.', 'npm', 'install', '--omit=dev', name);
+            try {
+                $$.$mol_exec('.', 'npm', 'install', '--omit=dev', '@types/' + name);
             }
-            else {
-                dir = parent;
+            catch (e) {
+                if ($$.$mol_fail_catch(e)) {
+                    $$.$mol_fail_log(e);
+                }
             }
         }
         try {
             return target.require(name);
         }
         catch (error) {
-            if (error.code === 'ERR_REQUIRE_ESM') {
+            if ($.$mol_fail_catch(error) && error.code === 'ERR_REQUIRE_ESM') {
                 const module = cache.get(name);
                 if (module)
                     return module;
@@ -2032,6 +2029,36 @@ const cache = new Map();
 require = (req => Object.assign(function require(name) {
     return $node[name];
 }, req))(require);
+
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_error_mix extends AggregateError {
+        cause;
+        name = $$.$mol_func_name(this.constructor).replace(/^\$/, '') + '_Error';
+        constructor(message, cause = {}, ...errors) {
+            super(errors, message, { cause });
+            this.cause = cause;
+            const stack_get = Object.getOwnPropertyDescriptor(this, 'stack')?.get ?? (() => super.stack);
+            Object.defineProperty(this, 'stack', {
+                get: () => (stack_get.call(this) ?? this.message) + '\n' + [JSON.stringify(this.cause, null, '  ') ?? 'no cause', ...this.errors.map(e => e.stack)].map(e => e.trim()
+                    .replace(/at /gm, '   at ')
+                    .replace(/^(?!    +at )(.*)/gm, '    at | $1 (#)')).join('\n')
+            });
+        }
+        static [Symbol.toPrimitive]() {
+            return this.toString();
+        }
+        static toString() {
+            return $$.$mol_func_name(this);
+        }
+        static make(...params) {
+            return new this(...params);
+        }
+    }
+    $.$mol_error_mix = $mol_error_mix;
+})($ || ($ = {}));
 
 ;
 "use strict";
@@ -2056,26 +2083,148 @@ var $;
 "use strict";
 var $;
 (function ($) {
-    function $mol_exec(dir, command, ...args) {
-        let [app, ...args0] = command.split(' ');
-        args = [...args0, ...args];
-        this.$mol_log3_come({
-            place: '$mol_exec',
-            dir: $node.path.relative('', dir),
-            message: 'Run',
-            command: `${app} ${args.join(' ')}`,
+    const factories = new WeakMap();
+    function factory(val) {
+        let make = factories.get(val);
+        if (make)
+            return make;
+        make = $mol_func_name_from((...args) => new val(...args), val);
+        factories.set(val, make);
+        return make;
+    }
+    function $mol_wire_sync(obj) {
+        return new Proxy(obj, {
+            get(obj, field) {
+                let val = obj[field];
+                if (typeof val !== 'function')
+                    return val;
+                const temp = $mol_wire_task.getter(val);
+                return function $mol_wire_sync(...args) {
+                    const fiber = temp(obj, args);
+                    return fiber.sync();
+                };
+            },
+            construct(obj, args) {
+                const temp = $mol_wire_task.getter(factory(obj));
+                return temp(obj, args).sync();
+            },
+            apply(obj, self, args) {
+                const temp = $mol_wire_task.getter(obj);
+                return temp(self, args).sync();
+            },
         });
-        var res = $node['child_process'].spawnSync(app, args, {
-            cwd: $node.path.resolve(dir),
-            shell: true,
-            env: this.$mol_env(),
-        });
-        if (res.status || res.error) {
-            return $mol_fail(res.error || new Error(res.stderr.toString(), { cause: res.stdout }));
+    }
+    $.$mol_wire_sync = $mol_wire_sync;
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_run_error extends $mol_error_mix {
+    }
+    $.$mol_run_error = $mol_run_error;
+    const child_process = $node['child_process'];
+    $.$mol_run_spawn = child_process.spawn.bind(child_process);
+    $.$mol_run_spawn_sync = child_process.spawnSync.bind(child_process);
+    function $mol_run_async({ dir, timeout, command, env }) {
+        const args_raw = typeof command === 'string' ? command.split(' ') : command;
+        const [app, ...args] = args_raw;
+        if (!env?.MOL_RUN_ASYNC) {
+            this.$mol_log3_come({
+                place: '$mol_run_sync',
+                message: 'Run',
+                command: args_raw.join(' '),
+                dir: $node.path.relative('', dir),
+            });
+            const res = this.$mol_run_spawn_sync(app, args, { shell: true, cwd: dir, env });
+            if (res.status)
+                $mol_fail(new Error(res.stderr.toString() || 'Exit(' + res.status + ')'));
+            return res;
         }
-        if (!res.stdout)
-            res.stdout = Buffer.from([]);
-        return res;
+        const sub = this.$mol_run_spawn(app, args, {
+            shell: true,
+            cwd: dir,
+            env
+        });
+        this.$mol_log3_come({
+            place: '$mol_run_async',
+            pid: sub.pid,
+            message: 'Run',
+            command: args_raw.join(' '),
+            dir: $node.path.relative('', dir),
+        });
+        let killed = false;
+        let timer;
+        const std_data = [];
+        const error_data = [];
+        const add = (std_chunk, error_chunk) => {
+            if (std_chunk)
+                std_data.push(std_chunk);
+            if (error_chunk)
+                error_data.push(error_chunk);
+            if (!timeout)
+                return;
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                const signal = killed ? 'SIGKILL' : 'SIGTERM';
+                killed = true;
+                add();
+                sub.kill(signal);
+            }, timeout);
+        };
+        add();
+        sub.stdout?.on('data', data => add(data));
+        sub.stderr?.on('data', data => add(undefined, data));
+        const promise = new Promise((done, fail) => {
+            const close = (error, status = null, signal = null) => {
+                if (!timer && timeout)
+                    return;
+                clearTimeout(timer);
+                timer = undefined;
+                const res = {
+                    pid: sub.pid,
+                    status,
+                    signal,
+                    get stdout() { return Buffer.concat(std_data); },
+                    get stderr() { return Buffer.concat(error_data); }
+                };
+                this.$mol_log3_done({
+                    place: '$mol_run_async',
+                    pid: sub.pid,
+                    message: 'Run',
+                    status,
+                    command: args_raw.join(' '),
+                    dir: $node.path.relative('', dir),
+                });
+                if (error || status || killed)
+                    return fail(new $mol_run_error((res.stderr.toString() || res.stdout.toString() || 'Run error') + (killed ? ', timeout' : ''), { signal, timeout: killed }, ...error ? [error] : []));
+                done(res);
+            };
+            sub.on('disconnect', () => close(new Error('Disconnected')));
+            sub.on('error', err => close(err));
+            sub.on('exit', (status, signal) => close(null, status, signal));
+        });
+        return Object.assign(promise, { destructor: () => {
+                clearTimeout(timer);
+                sub.kill('SIGKILL');
+            } });
+    }
+    $.$mol_run_async = $mol_run_async;
+    function $mol_run(options) {
+        if (!options.env)
+            options = { ...options, env: this.$mol_env() };
+        return $mol_wire_sync(this).$mol_run_async(options);
+    }
+    $.$mol_run = $mol_run;
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($) {
+    function $mol_exec(dir, command, ...args) {
+        return this.$mol_run({ command: [command, ...args], dir });
     }
     $.$mol_exec = $mol_exec;
 })($ || ($ = {}));
@@ -2374,6 +2523,8 @@ var $;
             const val = fields[key];
             if (val === undefined)
                 continue;
+            if (val === el[key])
+                continue;
             el[key] = val;
         }
     }
@@ -2671,7 +2822,6 @@ var $;
         return suffix;
     }
     $.$mol_view_state_key = $mol_view_state_key;
-    const error_showed = new WeakMap();
     class $mol_view extends $mol_object {
         static Root(id) {
             return new this;
@@ -2818,14 +2968,11 @@ var $;
                 $mol_dom_render_attributes(node, { mol_view_error });
                 if ($mol_promise_like(error))
                     break render;
-                if ((error_showed.get(error) ?? this) !== this)
-                    break render;
                 try {
                     const message = error.message || error;
                     node.innerText = message.replace(/^|$/mg, '\xA0\xA0');
                 }
                 catch { }
-                error_showed.set(error, this);
             }
             try {
                 this.auto();
@@ -3116,7 +3263,7 @@ var $;
 		}
 		Dots(){
 			const obj = new this.$.$mol_view();
-			(obj.sub) = () => ((this?.dots()));
+			(obj.sub) = () => ((this.dots()));
 			return obj;
 		}
 		left(id){
@@ -3139,17 +3286,17 @@ var $;
 			return 0;
 		}
 		style(){
-			return {"transform": (this?.transform())};
+			return {"transform": (this.transform())};
 		}
 		sub(){
-			return [(this?.Dots())];
+			return [(this.Dots())];
 		}
 		Dot(id){
 			const obj = new this.$.$mol_perf_sierp_dot();
-			(obj.left) = () => ((this?.left(id)));
-			(obj.top) = () => ((this?.top(id)));
-			(obj.size) = () => ((this?.size(id)));
-			(obj.text) = () => ((this?.text()));
+			(obj.left) = () => ((this.left(id)));
+			(obj.top) = () => ((this.top(id)));
+			(obj.size) = () => ((this.size(id)));
+			(obj.text) = () => ((this.text()));
 			return obj;
 		}
 	};
@@ -3161,10 +3308,10 @@ var $;
 			return "";
 		}
 		width(){
-			return (this?.size());
+			return (this.size());
 		}
 		height(){
-			return (this?.size());
+			return (this.size());
 		}
 		left(){
 			return 0;
@@ -3173,7 +3320,7 @@ var $;
 			return 0;
 		}
 		radius(){
-			return (this?.size());
+			return (this.size());
 		}
 		color(){
 			return "";
@@ -3197,24 +3344,24 @@ var $;
 			return false;
 		}
 		sub(){
-			return [(this?.text())];
+			return [(this.text())];
 		}
 		style(){
 			return {
-				"width": (this?.width()), 
-				"height": (this?.height()), 
-				"left": (this?.left()), 
-				"top": (this?.top()), 
-				"borderRadius": (this?.radius()), 
-				"lineHeight": (this?.size_px()), 
-				"background": (this?.color())
+				"width": (this.width()), 
+				"height": (this.height()), 
+				"left": (this.left()), 
+				"top": (this.top()), 
+				"borderRadius": (this.radius()), 
+				"lineHeight": (this.size_px()), 
+				"background": (this.color())
 			};
 		}
 		event(){
 			return {
 				...(super.event()), 
-				"mouseenter": (next) => (this?.enter(next)), 
-				"mouseleave": (next) => (this?.leave(next))
+				"mouseenter": (next) => (this.enter(next)), 
+				"mouseleave": (next) => (this.leave(next))
 			};
 		}
 	};

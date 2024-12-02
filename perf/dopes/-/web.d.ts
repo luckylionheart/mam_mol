@@ -159,6 +159,7 @@ declare namespace $ {
 
 declare namespace $ {
     class $mol_wire_pub_sub extends $mol_wire_pub implements $mol_wire_sub {
+        [x: symbol]: () => any[];
         protected pub_from: number;
         protected cursor: $mol_wire_cursor;
         get temp(): boolean;
@@ -193,6 +194,7 @@ declare namespace $ {
 
 declare namespace $ {
     abstract class $mol_wire_fiber<Host, Args extends readonly unknown[], Result> extends $mol_wire_pub_sub {
+        [x: symbol]: string | (() => any[]);
         readonly task: (this: Host, ...args: Args) => Result;
         readonly host?: Host | undefined;
         static warm: boolean;
@@ -736,11 +738,12 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    type $mol_view_content = $mol_view | Node | string | number | boolean;
+    type $mol_view_content = $mol_view | Node | string | number | boolean | null;
     function $mol_view_visible_width(): number;
     function $mol_view_visible_height(): number;
     function $mol_view_state_key(suffix: string): string;
     class $mol_view extends $mol_object {
+        [x: symbol]: () => any[];
         static Root<This extends typeof $mol_view>(this: This, id: number): InstanceType<This>;
         autorun(): void;
         static autobind(): void;
@@ -749,8 +752,8 @@ declare namespace $ {
         state_key(suffix?: string): string;
         dom_name(): string;
         dom_name_space(): string;
-        sub(): readonly ($mol_view | Node | string | number | boolean)[];
-        sub_visible(): readonly (string | number | boolean | $mol_view | Node)[];
+        sub(): readonly $mol_view_content[];
+        sub_visible(): readonly $mol_view_content[];
         minimal_width(): number;
         maximal_width(): number;
         minimal_height(): number;
@@ -816,7 +819,7 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    let $mol_layer: Record<string, $mol_style_func<"var", unknown>>;
+    let $mol_layer: Record<"focus" | "float" | "hover" | "speck" | "popup", $mol_style_func<"var", unknown>>;
 }
 
 declare namespace $ {
@@ -953,7 +956,7 @@ declare namespace $ {
 
 declare namespace $ {
 
-	type $mol_speck__value__QIS44EYQ = $mol_type_enforce<
+	type $mol_speck__value_mol_button_1 = $mol_type_enforce<
 		ReturnType< $mol_button['error'] >
 		,
 		ReturnType< $mol_speck['value'] >
@@ -997,7 +1000,7 @@ declare namespace $.$$ {
         tab_index(): number;
         error(): string;
         hint_safe(): string;
-        sub_visible(): ($mol_speck | $mol_view_content)[];
+        sub_visible(): ($mol_view_content | $mol_speck)[];
     }
 }
 
@@ -1064,37 +1067,37 @@ declare namespace $ {
 
 declare namespace $ {
 
-	type $mol_view__sub__2MFT9UJ5 = $mol_type_enforce<
+	type $mol_view__sub_mol_perf_dopes_1 = $mol_type_enforce<
 		readonly(any)[]
 		,
 		ReturnType< $mol_view['sub'] >
 	>
-	type $mol_button_major__title__F025DBPV = $mol_type_enforce<
+	type $mol_button_major__title_mol_perf_dopes_2 = $mol_type_enforce<
 		string
 		,
 		ReturnType< $mol_button_major['title'] >
 	>
-	type $mol_button_major__click__X4XPGPOJ = $mol_type_enforce<
+	type $mol_button_major__click_mol_perf_dopes_3 = $mol_type_enforce<
 		ReturnType< $mol_perf_dopes['start'] >
 		,
 		ReturnType< $mol_button_major['click'] >
 	>
-	type $mol_button_major__title__D0Y7UNGL = $mol_type_enforce<
+	type $mol_button_major__title_mol_perf_dopes_4 = $mol_type_enforce<
 		string
 		,
 		ReturnType< $mol_button_major['title'] >
 	>
-	type $mol_button_major__click__UHG2GEP8 = $mol_type_enforce<
+	type $mol_button_major__click_mol_perf_dopes_5 = $mol_type_enforce<
 		ReturnType< $mol_perf_dopes['stop'] >
 		,
 		ReturnType< $mol_button_major['click'] >
 	>
-	type $mol_view__sub__MO7KB1GQ = $mol_type_enforce<
+	type $mol_view__sub_mol_perf_dopes_6 = $mol_type_enforce<
 		ReturnType< $mol_perf_dopes['labels'] >
 		,
 		ReturnType< $mol_view['sub'] >
 	>
-	type $mol_view__style__UD30IZPD = $mol_type_enforce<
+	type $mol_view__style_mol_perf_dopes_7 = $mol_type_enforce<
 		({ 
 			'color': ReturnType< $mol_perf_dopes['label_color'] >,
 			'transform': ReturnType< $mol_perf_dopes['label_transform'] >,
@@ -1102,7 +1105,7 @@ declare namespace $ {
 		,
 		ReturnType< $mol_view['style'] >
 	>
-	type $mol_view__sub__457MSHVN = $mol_type_enforce<
+	type $mol_view__sub_mol_perf_dopes_8 = $mol_type_enforce<
 		readonly(any)[]
 		,
 		ReturnType< $mol_view['sub'] >

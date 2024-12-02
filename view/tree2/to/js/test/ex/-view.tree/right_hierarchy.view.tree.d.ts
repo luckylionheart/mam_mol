@@ -1,31 +1,31 @@
 declare namespace $ {
 
-	type $mol_view_tree2_to_js_test_ex_right_hierarchy_foo_indexed_title__QCZ58ECG = $mol_type_enforce<
+	type _mol_view_tree2_to_js_test_ex_right_hierarchy_foo_1 = $mol_type_enforce<
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['indexed_title'] >[0]
 		,
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['Indexed'] >[0]
 	>
-	type $mol_view_tree2_to_js_test_ex_right_hierarchy_foo_indexed_title__YLO0Q9EK = $mol_type_enforce<
+	type _mol_view_tree2_to_js_test_ex_right_hierarchy_foo_2 = $mol_type_enforce<
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['indexed_title'] >[1]
 		,
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['Indexed'] >[0]
 	>
-	type $mol_view_tree2_to_js_test_ex_right_hierarchy_foo_prj_domain__N55NTYSW = $mol_type_enforce<
+	type _mol_view_tree2_to_js_test_ex_right_hierarchy_foo_3 = $mol_type_enforce<
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['prj_domain'] >[0]
 		,
 		Parameters< ReturnType< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['prj'] >['domain'] >[0]
 	>
-	type $mol_view_tree2_to_js_test_ex_right_hierarchy_foo_prj_user__8VYCRSH6 = $mol_type_enforce<
+	type _mol_view_tree2_to_js_test_ex_right_hierarchy_foo_4 = $mol_type_enforce<
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['prj_user'] >[0]
 		,
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['prj_domain'] >[0]
 	>
-	type $mol_view_tree2_to_js_test_ex_right_hierarchy_foo_prj_user_id__CMWMAU80 = $mol_type_enforce<
+	type _mol_view_tree2_to_js_test_ex_right_hierarchy_foo_5 = $mol_type_enforce<
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['prj_user_id'] >[0]
 		,
 		Parameters< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['prj_user'] >[0]
 	>
-	type $mol_view_tree2_to_js_test_ex_right_hierarchy_bar__id__J7QEIG9J = $mol_type_enforce<
+	type $mol_view_tree2_to_js_test_ex_right_hierarchy_bar__id_mol_view_tree2_to_js_test_ex_right_hierarchy_foo_6 = $mol_type_enforce<
 		ReturnType< $mol_view_tree2_to_js_test_ex_right_hierarchy_foo['indexed_id'] >
 		,
 		ReturnType< $mol_view_tree2_to_js_test_ex_right_hierarchy_bar['id'] >

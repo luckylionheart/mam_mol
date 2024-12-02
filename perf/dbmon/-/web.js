@@ -1180,7 +1180,8 @@ var $;
                         break reuse;
                     return existen;
                 }
-                const next = new $mol_wire_task(`${host?.[Symbol.toStringTag] ?? host}.${task.name}<#>`, task, host, args);
+                const key = (host?.[Symbol.toStringTag] ?? host) + ('.' + task.name + '<#>');
+                const next = new $mol_wire_task(key, task, host, args);
                 if (existen?.temp) {
                     $$.$mol_log3_warn({
                         place: '$mol_wire_task',
@@ -1297,7 +1298,7 @@ var $;
             if (existen)
                 return existen;
             const prefix = host?.[Symbol.toStringTag] ?? (host instanceof Function ? $$.$mol_func_name(host) : host);
-            const key = `${prefix}.${field}`;
+            const key = prefix + ('.' + field);
             const fiber = new $mol_wire_atom(key, task, host, []);
             (host ?? task)[field] = fiber;
             return fiber;
@@ -1315,7 +1316,7 @@ var $;
             else {
                 dict = (host ?? task)[field] = new Map();
             }
-            const id = `${prefix}.${task.name}<${key_str.replace(/^"|"$/g, "'")}>`;
+            const id = prefix + ('.' + task.name) + ('<' + key_str.replace(/^"|"$/g, "'") + '>');
             const fiber = new $mol_wire_atom(id, task, host, [key]);
             dict.set(key_str, fiber);
             return fiber;
@@ -1845,6 +1846,8 @@ var $;
             const val = fields[key];
             if (val === undefined)
                 continue;
+            if (val === el[key])
+                continue;
             el[key] = val;
         }
     }
@@ -2139,7 +2142,6 @@ var $;
         return suffix;
     }
     $.$mol_view_state_key = $mol_view_state_key;
-    const error_showed = new WeakMap();
     class $mol_view extends $mol_object {
         static Root(id) {
             return new this;
@@ -2286,14 +2288,11 @@ var $;
                 $mol_dom_render_attributes(node, { mol_view_error });
                 if ($mol_promise_like(error))
                     break render;
-                if ((error_showed.get(error) ?? this) !== this)
-                    break render;
                 try {
                     const message = error.message || error;
                     node.innerText = message.replace(/^|$/mg, '\xA0\xA0');
                 }
                 catch { }
-                error_showed.set(error, this);
             }
             try {
                 this.auto();
@@ -2599,10 +2598,10 @@ var $;
 			return 0;
 		}
 		field(){
-			return {...(super.field()), "tabIndex": (this?.tabindex())};
+			return {...(super.field()), "tabIndex": (this.tabindex())};
 		}
 		event(){
-			return {...(super.event()), "scroll": (next) => (this?.event_scroll(next))};
+			return {...(super.event()), "scroll": (next) => (this.event_scroll(next))};
 		}
 	};
 	($mol_mem(($.$mol_scroll.prototype), "event_scroll"));
@@ -2905,7 +2904,7 @@ var $;
 			return 0;
 		}
 		sub(){
-			return (this?.rows());
+			return (this.rows());
 		}
 		Empty(){
 			const obj = new this.$.$mol_view();
@@ -2913,12 +2912,12 @@ var $;
 		}
 		Gap_before(){
 			const obj = new this.$.$mol_view();
-			(obj.style) = () => ({"paddingTop": (this?.gap_before())});
+			(obj.style) = () => ({"paddingTop": (this.gap_before())});
 			return obj;
 		}
 		Gap_after(){
 			const obj = new this.$.$mol_view();
-			(obj.style) = () => ({"paddingTop": (this?.gap_after())});
+			(obj.style) = () => ({"paddingTop": (this.gap_after())});
 			return obj;
 		}
 		view_window(){
@@ -3109,9 +3108,9 @@ var $;
 		}
 		Bubble(){
 			const obj = new this.$.$mol_pop_bubble();
-			(obj.align) = () => ((this?.align()));
-			(obj.content) = () => ((this?.bubble_content()));
-			(obj.height_max) = () => ((this?.height_max()));
+			(obj.align) = () => ((this.align()));
+			(obj.content) = () => ((this.bubble_content()));
+			(obj.height_max) = () => ((this.height_max()));
 			return obj;
 		}
 		showed(next){
@@ -3128,10 +3127,10 @@ var $;
 			return "vert";
 		}
 		sub(){
-			return [(this?.Anchor())];
+			return [(this.Anchor())];
 		}
 		sub_visible(){
-			return [(this?.Anchor()), (this?.Bubble())];
+			return [(this.Anchor()), (this.Bubble())];
 		}
 	};
 	($mol_mem(($.$mol_pop.prototype), "Bubble"));
@@ -3147,15 +3146,15 @@ var $;
 			return "";
 		}
 		sub(){
-			return (this?.content());
+			return (this.content());
 		}
 		style(){
-			return {...(super.style()), "maxHeight": (this?.height_max())};
+			return {...(super.style()), "maxHeight": (this.height_max())};
 		}
 		attr(){
 			return {
 				...(super.attr()), 
-				"mol_pop_align": (this?.align()), 
+				"mol_pop_align": (this.align()), 
 				"tabindex": 0
 			};
 		}
@@ -3299,7 +3298,7 @@ var $;
 			return null;
 		}
 		showed(){
-			return (this?.hovered());
+			return (this.hovered());
 		}
 		attr(){
 			return {...(super.attr()), "tabindex": 0};
@@ -3307,8 +3306,8 @@ var $;
 		event(){
 			return {
 				...(super.event()), 
-				"mouseenter": (next) => (this?.event_show(next)), 
-				"mouseleave": (next) => (this?.event_hide(next))
+				"mouseenter": (next) => (this.event_show(next)), 
+				"mouseleave": (next) => (this.event_hide(next))
 			};
 		}
 	};
@@ -3355,7 +3354,7 @@ var $;
 		}
 		Databases(){
 			const obj = new this.$.$mol_list();
-			(obj.rows) = () => ((this?.databases()));
+			(obj.rows) = () => ((this.databases()));
 			return obj;
 		}
 		name(id){
@@ -3363,7 +3362,7 @@ var $;
 		}
 		Name(id){
 			const obj = new this.$.$mol_view();
-			(obj.sub) = () => ([(this?.name(id))]);
+			(obj.sub) = () => ([(this.name(id))]);
 			return obj;
 		}
 		query_count_label_mod(id){
@@ -3374,8 +3373,8 @@ var $;
 		}
 		Query_count(id){
 			const obj = new this.$.$mol_perf_dbmon_query_count();
-			(obj.label_mod) = () => ((this?.query_count_label_mod(id)));
-			(obj.count) = () => ((this?.query_count(id)));
+			(obj.label_mod) = () => ((this.query_count_label_mod(id)));
+			(obj.count) = () => ((this.query_count(id)));
 			return obj;
 		}
 		top_queries(id){
@@ -3383,9 +3382,9 @@ var $;
 		}
 		database(id){
 			return [
-				(this?.Name(id)), 
-				(this?.Query_count(id)), 
-				(this?.top_queries(id))
+				(this.Name(id)), 
+				(this.Query_count(id)), 
+				(this.top_queries(id))
 			];
 		}
 		query_elapsed(id){
@@ -3401,18 +3400,18 @@ var $;
 			return "dbmon ($mol)";
 		}
 		sub(){
-			return [(this?.Databases())];
+			return [(this.Databases())];
 		}
 		Database(id){
 			const obj = new this.$.$mol_view();
-			(obj.sub) = () => ((this?.database(id)));
+			(obj.sub) = () => ((this.database(id)));
 			return obj;
 		}
 		Query(id){
 			const obj = new this.$.$mol_perf_dbmon_query();
-			(obj.elapsed) = () => ((this?.query_elapsed(id)));
-			(obj.elapsed_mod) = () => ((this?.query_elapsed_mod(id)));
-			(obj.value) = () => ((this?.query_value(id)));
+			(obj.elapsed) = () => ((this.query_elapsed(id)));
+			(obj.elapsed_mod) = () => ((this.query_elapsed_mod(id)));
+			(obj.value) = () => ((this.query_value(id)));
 			return obj;
 		}
 	};
@@ -3430,12 +3429,12 @@ var $;
 		}
 		Label(){
 			const obj = new this.$.$mol_view();
-			(obj.attr) = () => ({"mol_perf_dbmon_query_count_label": (this?.label_mod())});
-			(obj.sub) = () => ([(this?.count())]);
+			(obj.attr) = () => ({"mol_perf_dbmon_query_count_label": (this.label_mod())});
+			(obj.sub) = () => ([(this.count())]);
 			return obj;
 		}
 		sub(){
-			return [(this?.Label())];
+			return [(this.Label())];
 		}
 	};
 	($mol_mem(($.$mol_perf_dbmon_query_count.prototype), "Label"));
@@ -3448,8 +3447,8 @@ var $;
 		}
 		Elapsed(){
 			const obj = new this.$.$mol_view();
-			(obj.attr) = () => ({"mol_perf_dbmon_query_elapsed": (this?.elapsed_mod())});
-			(obj.sub) = () => ([(this?.elapsed())]);
+			(obj.attr) = () => ({"mol_perf_dbmon_query_elapsed": (this.elapsed_mod())});
+			(obj.sub) = () => ([(this.elapsed())]);
 			return obj;
 		}
 		value(){
@@ -3459,10 +3458,10 @@ var $;
 			return 40;
 		}
 		Anchor(){
-			return (this?.Elapsed());
+			return (this.Elapsed());
 		}
 		bubble_content(){
-			return [(this?.value())];
+			return [(this.value())];
 		}
 		align(){
 			return "left_center";

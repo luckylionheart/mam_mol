@@ -7,14 +7,14 @@ declare namespace $ {
 		})  & ReturnType< $mol_view['style'] >
 	}
 	
-	type $mol_portion_indicator__width_style__8GYVWU35 = $mol_type_enforce<
+	type $mol_portion_indicator__width_style_mol_portion_1 = $mol_type_enforce<
 		ReturnType< $mol_portion['indicator_width_style'] >
 		,
 		ReturnType< $mol_portion_indicator['width_style'] >
 	>
 	export class $mol_portion extends $mol_view {
 		indicator_width_style( ): string
-		indicator( ): $mol_portion_indicator
+		Indicator( ): $mol_portion_indicator
 		portion( ): number
 		sub( ): readonly(any)[]
 	}

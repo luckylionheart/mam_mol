@@ -3,25 +3,25 @@
 			return "0";
 		}
 		style(){
-			return {...(super.style()), "width": (this?.width_style())};
+			return {...(super.style()), "width": (this.width_style())};
 		}
 	};
 	($.$mol_portion) = class $mol_portion extends ($.$mol_view) {
 		indicator_width_style(){
 			return "0";
 		}
-		indicator(){
+		Indicator(){
 			const obj = new this.$.$mol_portion_indicator();
-			(obj.width_style) = () => ((this?.indicator_width_style()));
+			(obj.width_style) = () => ((this.indicator_width_style()));
 			return obj;
 		}
 		portion(){
 			return 0;
 		}
 		sub(){
-			return [(this?.indicator())];
+			return [(this.Indicator())];
 		}
 	};
-	($mol_mem(($.$mol_portion.prototype), "indicator"));
+	($mol_mem(($.$mol_portion.prototype), "Indicator"));
 
 //# sourceMappingURL=portion.view.tree.js.map

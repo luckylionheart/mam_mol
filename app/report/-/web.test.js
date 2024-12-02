@@ -1199,6 +1199,59 @@ var $;
         'test types'($) {
             class A {
                 static a() {
+                    return '';
+                }
+                static b() {
+                    return $mol_wire_async(this).a();
+                }
+            }
+        },
+        async 'Latest method calls wins'($) {
+            class NameLogger extends $mol_object2 {
+                static $ = $;
+                static first = [];
+                static last = [];
+                static send(next) {
+                    $mol_wire_sync(this.first).push(next);
+                    $$.$mol_wait_timeout(0);
+                    this.last.push(next);
+                }
+            }
+            const name = $mol_wire_async(NameLogger).send;
+            name('john');
+            const promise = name('jin');
+            $.$mol_after_mock_warp();
+            await promise;
+            $mol_assert_equal(NameLogger.first, ['john', 'jin']);
+            $mol_assert_equal(NameLogger.last, ['jin']);
+        },
+        async 'Latest function calls wins'($) {
+            const first = [];
+            const last = [];
+            function send_name(next) {
+                $mol_wire_sync(first).push(next);
+                $$.$mol_wait_timeout(0);
+                last.push(next);
+            }
+            const name = $mol_wire_async(send_name);
+            name('john');
+            const promise = name('jin');
+            $.$mol_after_mock_warp();
+            await promise;
+            $mol_assert_equal(first, ['john', 'jin']);
+            $mol_assert_equal(last, ['jin']);
+        },
+    });
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($_1) {
+    $mol_test({
+        'test types'($) {
+            class A {
+                static a() {
                     return Promise.resolve('');
                 }
                 static b() {
@@ -1206,7 +1259,104 @@ var $;
                 }
             }
         },
+        async 'test method from host'($) {
+            let count = 0;
+            class A {
+                static a() {
+                    return $mol_wire_sync(this).b();
+                }
+                static b() { return Promise.resolve(++count); }
+            }
+            $mol_assert_equal(await $mol_wire_async(A).a(), 1, count);
+        },
+        async 'test function'($) {
+            let count = 0;
+            class A {
+                static a() {
+                    return $mol_wire_sync(this.b)();
+                }
+                static b() { return Promise.resolve(++count); }
+            }
+            $mol_assert_equal(await $mol_wire_async(A).a(), 1, count);
+        },
+        async 'test construct itself'($) {
+            class A {
+                static instances = [];
+                static a() {
+                    const a = new ($mol_wire_sync(A))();
+                    this.instances.push(a);
+                    $mol_wire_sync(this).b();
+                }
+                static b() { return Promise.resolve(); }
+            }
+            await $mol_wire_async(A).a();
+            $mol_assert_equal(A.instances.length, 2);
+            $mol_assert_equal(A.instances[0] instanceof A);
+            $mol_assert_equal(A.instances[0], A.instances[1]);
+        }
     });
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_after_work extends $mol_object2 {
+        delay;
+        task;
+        id;
+        constructor(delay, task) {
+            super();
+            this.delay = delay;
+            this.task = task;
+            this.id = requestIdleCallback(task, { timeout: delay });
+        }
+        destructor() {
+            cancelIdleCallback(this.id);
+        }
+    }
+    $.$mol_after_work = $mol_after_work;
+    if (typeof requestIdleCallback !== 'function') {
+        $.$mol_after_work = $mol_after_timeout;
+    }
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($_1) {
+    $mol_test_mocks.push($ => {
+        $.$mol_after_work = $mol_after_mock_timeout;
+    });
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($) {
+    function $mol_wait_rest_async() {
+        return new Promise(done => {
+            new this.$mol_after_work(16, () => done(null));
+        });
+    }
+    $.$mol_wait_rest_async = $mol_wait_rest_async;
+    function $mol_wait_rest() {
+        return this.$mol_wire_sync(this).$mol_wait_rest_async();
+    }
+    $.$mol_wait_rest = $mol_wait_rest;
+})($ || ($ = {}));
+
+;
+"use strict";
+var $;
+(function ($_1) {
+    var $$;
+    (function ($$) {
+        $mol_test_mocks.push($ => {
+            $.$mol_wait_timeout = function $mol_wait_timeout_mock(timeout) { };
+            $.$mol_wait_timeout_async = async function $mol_wait_timeout_async_mock(timeout) { };
+        });
+    })($$ = $_1.$$ || ($_1.$$ = {}));
 })($ || ($ = {}));
 
 ;
@@ -1231,53 +1381,13 @@ var $;
 "use strict";
 var $;
 (function ($_1) {
-    $mol_test({
-        'test types'($) {
-            class A {
-                static a() {
-                    return '';
-                }
-                static b() {
-                    return $mol_wire_async(this).a();
-                }
-            }
-        },
-        async 'Latest method calls wins'($) {
-            class NameLogger extends $mol_object2 {
-                static $ = $;
-                static first = [];
-                static last = [];
-                static send(next) {
-                    $mol_wire_sync(this.first).push(next);
-                    this.$.$mol_wait_timeout(0);
-                    this.last.push(next);
-                }
-            }
-            const name = $mol_wire_async(NameLogger).send;
-            name('john');
-            const promise = name('jin');
-            $.$mol_after_mock_warp();
-            await promise;
-            $mol_assert_like(NameLogger.first, ['john', 'jin']);
-            $mol_assert_like(NameLogger.last, ['jin']);
-        },
-        async 'Latest function calls wins'($) {
-            const first = [];
-            const last = [];
-            function send_name(next) {
-                $mol_wire_sync(first).push(next);
-                $.$mol_wait_timeout(0);
-                last.push(next);
-            }
-            const name = $mol_wire_async(send_name);
-            name('john');
-            const promise = name('jin');
-            $.$mol_after_mock_warp();
-            await promise;
-            $mol_assert_like(first, ['john', 'jin']);
-            $mol_assert_like(last, ['jin']);
-        },
-    });
+    var $$;
+    (function ($$) {
+        $mol_test_mocks.push($ => {
+            $.$mol_wait_rest = function $mol_wait_rest_mock() { };
+            $.$mol_wait_rest_async = async function $mol_wait_rest_async_mock() { };
+        });
+    })($$ = $_1.$$ || ($_1.$$ = {}));
 })($ || ($ = {}));
 
 ;

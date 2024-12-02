@@ -1180,7 +1180,8 @@ var $;
                         break reuse;
                     return existen;
                 }
-                const next = new $mol_wire_task(`${host?.[Symbol.toStringTag] ?? host}.${task.name}<#>`, task, host, args);
+                const key = (host?.[Symbol.toStringTag] ?? host) + ('.' + task.name + '<#>');
+                const next = new $mol_wire_task(key, task, host, args);
                 if (existen?.temp) {
                     $$.$mol_log3_warn({
                         place: '$mol_wire_task',
@@ -1297,7 +1298,7 @@ var $;
             if (existen)
                 return existen;
             const prefix = host?.[Symbol.toStringTag] ?? (host instanceof Function ? $$.$mol_func_name(host) : host);
-            const key = `${prefix}.${field}`;
+            const key = prefix + ('.' + field);
             const fiber = new $mol_wire_atom(key, task, host, []);
             (host ?? task)[field] = fiber;
             return fiber;
@@ -1315,7 +1316,7 @@ var $;
             else {
                 dict = (host ?? task)[field] = new Map();
             }
-            const id = `${prefix}.${task.name}<${key_str.replace(/^"|"$/g, "'")}>`;
+            const id = prefix + ('.' + task.name) + ('<' + key_str.replace(/^"|"$/g, "'") + '>');
             const fiber = new $mol_wire_atom(id, task, host, [key]);
             dict.set(key_str, fiber);
             return fiber;
@@ -1845,6 +1846,8 @@ var $;
             const val = fields[key];
             if (val === undefined)
                 continue;
+            if (val === el[key])
+                continue;
             el[key] = val;
         }
     }
@@ -2139,7 +2142,6 @@ var $;
         return suffix;
     }
     $.$mol_view_state_key = $mol_view_state_key;
-    const error_showed = new WeakMap();
     class $mol_view extends $mol_object {
         static Root(id) {
             return new this;
@@ -2286,14 +2288,11 @@ var $;
                 $mol_dom_render_attributes(node, { mol_view_error });
                 if ($mol_promise_like(error))
                     break render;
-                if ((error_showed.get(error) ?? this) !== this)
-                    break render;
                 try {
                     const message = error.message || error;
                     node.innerText = message.replace(/^|$/mg, '\xA0\xA0');
                 }
                 catch { }
-                error_showed.set(error, this);
             }
             try {
                 this.auto();
@@ -2591,7 +2590,7 @@ var $;
 		}
 		Dots(){
 			const obj = new this.$.$mol_view();
-			(obj.sub) = () => ((this?.dots()));
+			(obj.sub) = () => ((this.dots()));
 			return obj;
 		}
 		left(id){
@@ -2614,17 +2613,17 @@ var $;
 			return 0;
 		}
 		style(){
-			return {"transform": (this?.transform())};
+			return {"transform": (this.transform())};
 		}
 		sub(){
-			return [(this?.Dots())];
+			return [(this.Dots())];
 		}
 		Dot(id){
 			const obj = new this.$.$mol_perf_sierp_dot();
-			(obj.left) = () => ((this?.left(id)));
-			(obj.top) = () => ((this?.top(id)));
-			(obj.size) = () => ((this?.size(id)));
-			(obj.text) = () => ((this?.text()));
+			(obj.left) = () => ((this.left(id)));
+			(obj.top) = () => ((this.top(id)));
+			(obj.size) = () => ((this.size(id)));
+			(obj.text) = () => ((this.text()));
 			return obj;
 		}
 	};
@@ -2636,10 +2635,10 @@ var $;
 			return "";
 		}
 		width(){
-			return (this?.size());
+			return (this.size());
 		}
 		height(){
-			return (this?.size());
+			return (this.size());
 		}
 		left(){
 			return 0;
@@ -2648,7 +2647,7 @@ var $;
 			return 0;
 		}
 		radius(){
-			return (this?.size());
+			return (this.size());
 		}
 		color(){
 			return "";
@@ -2672,24 +2671,24 @@ var $;
 			return false;
 		}
 		sub(){
-			return [(this?.text())];
+			return [(this.text())];
 		}
 		style(){
 			return {
-				"width": (this?.width()), 
-				"height": (this?.height()), 
-				"left": (this?.left()), 
-				"top": (this?.top()), 
-				"borderRadius": (this?.radius()), 
-				"lineHeight": (this?.size_px()), 
-				"background": (this?.color())
+				"width": (this.width()), 
+				"height": (this.height()), 
+				"left": (this.left()), 
+				"top": (this.top()), 
+				"borderRadius": (this.radius()), 
+				"lineHeight": (this.size_px()), 
+				"background": (this.color())
 			};
 		}
 		event(){
 			return {
 				...(super.event()), 
-				"mouseenter": (next) => (this?.enter(next)), 
-				"mouseleave": (next) => (this?.leave(next))
+				"mouseenter": (next) => (this.enter(next)), 
+				"mouseleave": (next) => (this.leave(next))
 			};
 		}
 	};

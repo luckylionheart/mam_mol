@@ -168,6 +168,7 @@ declare namespace $ {
 
 declare namespace $ {
     class $mol_wire_pub_sub extends $mol_wire_pub implements $mol_wire_sub {
+        [x: symbol]: () => any[];
         protected pub_from: number;
         protected cursor: $mol_wire_cursor;
         get temp(): boolean;
@@ -202,6 +203,7 @@ declare namespace $ {
 
 declare namespace $ {
     abstract class $mol_wire_fiber<Host, Args extends readonly unknown[], Result> extends $mol_wire_pub_sub {
+        [x: symbol]: string | (() => any[]);
         readonly task: (this: Host, ...args: Args) => Result;
         readonly host?: Host | undefined;
         static warm: boolean;
@@ -487,6 +489,17 @@ declare var $node: $node;
 declare const cache: Map<string, any>;
 
 declare namespace $ {
+    class $mol_error_mix<Cause extends {} = {}> extends AggregateError {
+        readonly cause: Cause;
+        name: string;
+        constructor(message: string, cause?: Cause, ...errors: Error[]);
+        static [Symbol.toPrimitive](): string;
+        static toString(): string;
+        static make(...params: ConstructorParameters<typeof $mol_error_mix>): $mol_error_mix<{}>;
+    }
+}
+
+declare namespace $ {
     function $mol_env(): Record<string, string | undefined>;
 }
 
@@ -494,7 +507,45 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    function $mol_exec(this: $, dir: string, command: string, ...args: string[]): import("child_process").SpawnSyncReturns<Buffer>;
+    export function $mol_wire_sync<Host extends object>(obj: Host): ObjectOrFunctionResultAwaited<Host>;
+    type FunctionResultAwaited<Some> = Some extends (...args: infer Args) => infer Res ? (...args: Args) => Awaited<Res> : Some;
+    type ConstructorResultAwaited<Some> = Some extends new (...args: infer Args) => infer Res ? new (...args: Args) => Res : {};
+    type MethodsResultAwaited<Host extends Object> = {
+        [K in keyof Host]: FunctionResultAwaited<Host[K]>;
+    };
+    type ObjectOrFunctionResultAwaited<Some> = (Some extends (...args: any) => unknown ? FunctionResultAwaited<Some> : {}) & (Some extends Object ? MethodsResultAwaited<Some> & ConstructorResultAwaited<Some> : Some);
+    export {};
+}
+
+declare namespace $ {
+    type $mol_run_error_context = {
+        pid?: number;
+        stdout: Buffer;
+        stderr: Buffer;
+        status?: number | null;
+        signal: NodeJS.Signals | null;
+    };
+    class $mol_run_error extends $mol_error_mix<{
+        timeout?: boolean;
+        signal?: NodeJS.Signals | null;
+    }> {
+    }
+    const $mol_run_spawn: typeof import("child_process").spawn;
+    const $mol_run_spawn_sync: typeof import("child_process").spawnSync;
+    type $mol_run_options = {
+        command: readonly string[] | string;
+        dir: string;
+        timeout?: number;
+        env?: Record<string, string | undefined>;
+    };
+    function $mol_run_async(this: $, { dir, timeout, command, env }: $mol_run_options): import("child_process").SpawnSyncReturns<Buffer<ArrayBufferLike>> | (Promise<$mol_run_error_context> & {
+        destructor: () => void;
+    });
+    function $mol_run(this: $, options: $mol_run_options): $mol_run_error_context | import("child_process").SpawnSyncReturns<Buffer<ArrayBufferLike>>;
+}
+
+declare namespace $ {
+    function $mol_exec(this: $, dir: string, command: string, ...args: readonly string[]): $mol_run_error_context | import("child_process").SpawnSyncReturns<Buffer<ArrayBufferLike>>;
 }
 
 declare namespace $ {
@@ -848,7 +899,7 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    const $mol_theme: Record<"image" | "line" | "text" | "focus" | "back" | "hover" | "card" | "current" | "special" | "control" | "shade" | "field", $mol_style_func<"var", unknown>>;
+    const $mol_theme: Record<"image" | "line" | "text" | "focus" | "field" | "back" | "hover" | "card" | "current" | "special" | "control" | "shade", $mol_style_func<"var", unknown>>;
 }
 
 declare namespace $ {
@@ -862,11 +913,12 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    type $mol_view_content = $mol_view | Node | string | number | boolean;
+    type $mol_view_content = $mol_view | Node | string | number | boolean | null;
     function $mol_view_visible_width(): number;
     function $mol_view_visible_height(): number;
     function $mol_view_state_key(suffix: string): string;
     class $mol_view extends $mol_object {
+        [x: symbol]: () => any[];
         static Root<This extends typeof $mol_view>(this: This, id: number): InstanceType<This>;
         autorun(): void;
         static autobind(): void;
@@ -875,8 +927,8 @@ declare namespace $ {
         state_key(suffix?: string): string;
         dom_name(): string;
         dom_name_space(): string;
-        sub(): readonly ($mol_view | Node | string | number | boolean)[];
-        sub_visible(): readonly (string | number | boolean | $mol_view | Node)[];
+        sub(): readonly $mol_view_content[];
+        sub_visible(): readonly $mol_view_content[];
         minimal_width(): number;
         maximal_width(): number;
         minimal_height(): number;
@@ -1054,14 +1106,14 @@ declare namespace $ {
 
 declare namespace $ {
 
-	type $mol_view__style__9BX7WPIO = $mol_type_enforce<
+	type $mol_view__style_mol_list_1 = $mol_type_enforce<
 		({ 
 			'paddingTop': ReturnType< $mol_list['gap_before'] >,
 		}) 
 		,
 		ReturnType< $mol_view['style'] >
 	>
-	type $mol_view__style__OUHK988Q = $mol_type_enforce<
+	type $mol_view__style_mol_list_2 = $mol_type_enforce<
 		({ 
 			'paddingTop': ReturnType< $mol_list['gap_after'] >,
 		}) 
@@ -1102,7 +1154,7 @@ declare namespace $ {
 
 declare namespace $ {
 
-	type $mol_perf_uibench_table_row__state__OU98RCR2 = $mol_type_enforce<
+	type $mol_perf_uibench_table_row__state_mol_perf_uibench_table_1 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_table['row_state'] >
 		,
 		ReturnType< $mol_perf_uibench_table_row['state'] >
@@ -1119,12 +1171,12 @@ declare namespace $ {
 		Row( id: any): $mol_perf_uibench_table_row
 	}
 	
-	type $mol_perf_uibench_table_cell__text__46F28AXM = $mol_type_enforce<
+	type $mol_perf_uibench_table_cell__text_mol_perf_uibench_table_row_1 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_table_row['head_text'] >
 		,
 		ReturnType< $mol_perf_uibench_table_cell['text'] >
 	>
-	type $mol_perf_uibench_table_cell__text__7Z6DW4DO = $mol_type_enforce<
+	type $mol_perf_uibench_table_cell__text_mol_perf_uibench_table_row_2 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_table_row['cell_state'] >
 		,
 		ReturnType< $mol_perf_uibench_table_cell['text'] >
@@ -1193,7 +1245,7 @@ declare namespace $.$$ {
 
 declare namespace $ {
 
-	type $mol_perf_uibench_anim_box__state__KAPBKEU2 = $mol_type_enforce<
+	type $mol_perf_uibench_anim_box__state_mol_perf_uibench_anim_1 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_anim['box_state'] >
 		,
 		ReturnType< $mol_perf_uibench_anim_box['state'] >
@@ -1249,7 +1301,7 @@ declare namespace $.$$ {
 
 declare namespace $ {
 
-	type $mol_perf_uibench_tree_branch__state__QD4HA7PN = $mol_type_enforce<
+	type $mol_perf_uibench_tree_branch__state_mol_perf_uibench_tree_1 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_tree['root_state'] >
 		,
 		ReturnType< $mol_perf_uibench_tree_branch['state'] >
@@ -1264,12 +1316,12 @@ declare namespace $ {
 		sub( ): readonly(any)[]
 	}
 	
-	type $mol_perf_uibench_tree_branch__state__ITO8IE3R = $mol_type_enforce<
+	type $mol_perf_uibench_tree_branch__state_mol_perf_uibench_tree_branch_1 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_tree_branch['branch_state'] >
 		,
 		ReturnType< $mol_perf_uibench_tree_branch['state'] >
 	>
-	type $mol_perf_uibench_tree_leaf__text__3XO33ZPH = $mol_type_enforce<
+	type $mol_perf_uibench_tree_leaf__text_mol_perf_uibench_tree_branch_2 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench_tree_branch['leaf_state'] >
 		,
 		ReturnType< $mol_perf_uibench_tree_leaf['text'] >
@@ -1318,17 +1370,17 @@ declare namespace $.$$ {
 
 declare namespace $ {
 
-	type $mol_perf_uibench_table__state__LQ8OVSEQ = $mol_type_enforce<
+	type $mol_perf_uibench_table__state_mol_perf_uibench_1 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench['table_state'] >
 		,
 		ReturnType< $mol_perf_uibench_table['state'] >
 	>
-	type $mol_perf_uibench_anim__state__6H3NHPDA = $mol_type_enforce<
+	type $mol_perf_uibench_anim__state_mol_perf_uibench_2 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench['anim_state'] >
 		,
 		ReturnType< $mol_perf_uibench_anim['state'] >
 	>
-	type $mol_perf_uibench_tree__state__DPQTACA9 = $mol_type_enforce<
+	type $mol_perf_uibench_tree__state_mol_perf_uibench_3 = $mol_type_enforce<
 		ReturnType< $mol_perf_uibench['tree_state'] >
 		,
 		ReturnType< $mol_perf_uibench_tree['state'] >

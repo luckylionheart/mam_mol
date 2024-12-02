@@ -215,6 +215,14 @@ declare namespace $ {
 }
 
 declare namespace $ {
+    function $mol_fail_catch(error: unknown): boolean;
+}
+
+declare namespace $ {
+    function $mol_fail_log(error: unknown): boolean;
+}
+
+declare namespace $ {
     enum $mol_wire_cursor {
         stale = -1,
         doubt = -2,
@@ -292,6 +300,7 @@ declare namespace $ {
 
 declare namespace $ {
     class $mol_wire_pub_sub extends $mol_wire_pub implements $mol_wire_sub {
+        [x: symbol]: () => any[];
         protected pub_from: number;
         protected cursor: $mol_wire_cursor;
         get temp(): boolean;
@@ -322,6 +331,7 @@ declare namespace $ {
 
 declare namespace $ {
     abstract class $mol_wire_fiber<Host, Args extends readonly unknown[], Result> extends $mol_wire_pub_sub {
+        [x: symbol]: string | (() => any[]);
         readonly task: (this: Host, ...args: Args) => Result;
         readonly host?: Host | undefined;
         static warm: boolean;
@@ -430,14 +440,6 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    function $mol_fail_catch(error: unknown): boolean;
-}
-
-declare namespace $ {
-    function $mol_fail_log(error: unknown): boolean;
-}
-
-declare namespace $ {
     class $mol_wire_atom<Host, Args extends readonly unknown[], Result> extends $mol_wire_fiber<Host, Args, Result> {
         static solo<Host, Args extends readonly unknown[], Result>(host: Host, task: (this: Host, ...args: Args) => Result): $mol_wire_atom<Host, Args, Result>;
         static plex<Host, Args extends readonly unknown[], Result>(host: Host, task: (this: Host, ...args: Args) => Result, key: Args[0]): $mol_wire_atom<Host, Args, Result>;
@@ -492,6 +494,17 @@ declare var $node: $node;
 declare const cache: Map<string, any>;
 
 declare namespace $ {
+    class $mol_error_mix<Cause extends {} = {}> extends AggregateError {
+        readonly cause: Cause;
+        name: string;
+        constructor(message: string, cause?: Cause, ...errors: Error[]);
+        static [Symbol.toPrimitive](): string;
+        static toString(): string;
+        static make(...params: ConstructorParameters<typeof $mol_error_mix>): $mol_error_mix<{}>;
+    }
+}
+
+declare namespace $ {
     function $mol_env(): Record<string, string | undefined>;
 }
 
@@ -499,11 +512,49 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    function $mol_exec(this: $, dir: string, command: string, ...args: string[]): import("child_process").SpawnSyncReturns<Buffer>;
+    export function $mol_wire_sync<Host extends object>(obj: Host): ObjectOrFunctionResultAwaited<Host>;
+    type FunctionResultAwaited<Some> = Some extends (...args: infer Args) => infer Res ? (...args: Args) => Awaited<Res> : Some;
+    type ConstructorResultAwaited<Some> = Some extends new (...args: infer Args) => infer Res ? new (...args: Args) => Res : {};
+    type MethodsResultAwaited<Host extends Object> = {
+        [K in keyof Host]: FunctionResultAwaited<Host[K]>;
+    };
+    type ObjectOrFunctionResultAwaited<Some> = (Some extends (...args: any) => unknown ? FunctionResultAwaited<Some> : {}) & (Some extends Object ? MethodsResultAwaited<Some> & ConstructorResultAwaited<Some> : Some);
+    export {};
 }
 
 declare namespace $ {
-    function $mol_charset_encode(value: string): Uint8Array;
+    type $mol_run_error_context = {
+        pid?: number;
+        stdout: Buffer;
+        stderr: Buffer;
+        status?: number | null;
+        signal: NodeJS.Signals | null;
+    };
+    class $mol_run_error extends $mol_error_mix<{
+        timeout?: boolean;
+        signal?: NodeJS.Signals | null;
+    }> {
+    }
+    const $mol_run_spawn: typeof import("child_process").spawn;
+    const $mol_run_spawn_sync: typeof import("child_process").spawnSync;
+    type $mol_run_options = {
+        command: readonly string[] | string;
+        dir: string;
+        timeout?: number;
+        env?: Record<string, string | undefined>;
+    };
+    function $mol_run_async(this: $, { dir, timeout, command, env }: $mol_run_options): import("child_process").SpawnSyncReturns<Buffer<ArrayBufferLike>> | (Promise<$mol_run_error_context> & {
+        destructor: () => void;
+    });
+    function $mol_run(this: $, options: $mol_run_options): $mol_run_error_context | import("child_process").SpawnSyncReturns<Buffer<ArrayBufferLike>>;
+}
+
+declare namespace $ {
+    function $mol_exec(this: $, dir: string, command: string, ...args: readonly string[]): $mol_run_error_context | import("child_process").SpawnSyncReturns<Buffer<ArrayBufferLike>>;
+}
+
+declare namespace $ {
+    function $mol_charset_encode(value: string): Uint8Array<ArrayBufferLike>;
 }
 
 declare namespace $ {
@@ -590,7 +641,7 @@ declare namespace $ {
         stat(next?: $mol_file_stat | null, virt?: 'virt'): $mol_file_stat | null;
         ensure(): void;
         drop(): void;
-        buffer(next?: Uint8Array): Uint8Array;
+        buffer(next?: Uint8Array): Uint8Array<ArrayBufferLike>;
         sub(): $mol_file[];
         resolve(path: string): $mol_file;
         relate(base?: $mol_file): string;
@@ -798,16 +849,6 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    export function $mol_wire_sync<Host extends object>(obj: Host): ObjectOrFunctionResultAwaited<Host>;
-    type FunctionResultAwaited<Some> = Some extends (...args: infer Args) => infer Res ? (...args: Args) => Awaited<Res> : Some;
-    type MethodsResultAwaited<Host extends Object> = {
-        [K in keyof Host]: FunctionResultAwaited<Host[K]>;
-    };
-    type ObjectOrFunctionResultAwaited<Some> = (Some extends (...args: any) => unknown ? FunctionResultAwaited<Some> : {}) & (Some extends Object ? MethodsResultAwaited<Some> : Some);
-    export {};
-}
-
-declare namespace $ {
     class $mol_storage extends $mol_object2 {
         static native(): StorageManager;
         static persisted(next?: boolean, cache?: 'cache'): boolean;
@@ -974,17 +1015,6 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    class $mol_error_mix<Cause extends {} = {}> extends AggregateError {
-        readonly cause: Cause;
-        name: string;
-        constructor(message: string, cause?: Cause, ...errors: Error[]);
-        static [Symbol.toPrimitive](): string;
-        static toString(): string;
-        static make(...params: ConstructorParameters<typeof $mol_error_mix>): $mol_error_mix<{}>;
-    }
-}
-
-declare namespace $ {
     function $mol_html_encode(text: string): string;
 }
 
@@ -1090,11 +1120,18 @@ declare namespace $ {
             [index: string]: number;
         };
         interactive(): boolean;
+        git_timeout(): number;
+        run_safe({ command, dir }: {
+            command: readonly string[] | string;
+            dir: string;
+        }): string;
         gitVersion(): string;
         gitDeepenSupported(): boolean;
-        gitPull(path: string): import("child_process").SpawnSyncReturns<Buffer>;
+        gitPull(path: string): string;
+        static git_enabled: boolean;
         gitSubmoduleDirs(): Set<string>;
         is_root_git(): boolean;
+        repo(path: string): $mol_tree2 | undefined;
         modEnsure(path: string): boolean;
         modMeta(path: string): $mol_tree2;
         graph({ path, exclude }: {
@@ -1204,20 +1241,21 @@ declare namespace $ {
 }
 
 declare namespace $ {
+    type $mol_server_middleware = (req: typeof $node.express.request, res: typeof $node.express.response, next: (error?: unknown) => void) => void | Promise<void>;
     class $mol_server extends $mol_object {
         express(): import("express-serve-static-core").Express;
         internal_ip(): string;
         http(): import("http").Server<typeof import("http").IncomingMessage, typeof import("http").ServerResponse>;
         connections: Set<import("ws")>;
         socket(): import("ws").Server<typeof import("ws"), typeof import("http").IncomingMessage>;
-        expressHandlers(): any[];
-        expressCompressor(): unknown;
-        expressCors(): unknown;
+        expressHandlers(): readonly $mol_server_middleware[];
+        expressCompressor(): $mol_server_middleware;
+        expressCors(): $mol_server_middleware;
         expressBodier(): import("connect").NextHandleFunction;
         expressFiler(): import("serve-static").RequestHandler<import("express").Response<any, Record<string, any>>>;
-        expressDirector(): unknown;
+        expressDirector(): import("express").Handler;
         expressIndex(): (req: typeof $node.express.request, res: typeof $node.express.response, next: () => void) => void;
-        expressGenerator(): (req: any, res: any, next: () => void) => void;
+        expressGenerator(): (req: typeof $node.express.request, res: typeof $node.express.response, next: () => void) => void;
         bodyLimit(): string;
         cacheTime(): number;
         port(): number;
@@ -1228,16 +1266,17 @@ declare namespace $ {
 declare namespace $ {
     class $mol_build_server extends $mol_server {
         static trace: boolean;
-        expressGenerator(): (req: any, res: any, next: () => void) => Promise<any> | undefined;
+        expressGenerator(): (req: any, res: any, next: (e?: unknown) => void) => Promise<any>;
         handleRequest(req: typeof $node.express.request, res: typeof $node.express.response, next: () => any): Promise<any> | undefined;
         build(): $mol_build;
         generate(url: string): $mol_file[];
-        expressIndex(): (req: typeof $node.express.request, res: typeof $node.express.response, next: () => void) => void | import("express").Response<any, Record<string, any>>;
+        expressIndex(): (req: typeof $node.express.request, res: typeof $node.express.response, next: (e?: unknown) => void) => Promise<void | import("express").Response<any, Record<string, any>>>;
+        expressIndexRequest(req: typeof $node.express.request, res: typeof $node.express.response, next: () => void): void | import("express").Response<any, Record<string, any>>;
         port(): number;
         lines(next?: Map<import("ws"), string>): Map<import("ws"), string>;
         socket(): import("ws").Server<typeof import("ws"), typeof import("http").IncomingMessage>;
         start(): import("ws").Server<typeof import("ws"), typeof import("http").IncomingMessage>;
-        notify([line, path]: [InstanceType<$node['ws']>, string]): boolean;
+        notify([line, path]: [InstanceType<$node['ws']['WebSocket']>, string]): boolean;
         slave_commands(next?: string[]): string[];
         slave_servers(): ((import("child_process").ChildProcessByStdio<import("stream").Writable, null, null> & {
             destructor: () => void;

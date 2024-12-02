@@ -1,56 +1,56 @@
 declare namespace $ {
 
-	type $mol_check_icon__checked__AXVWKE3J = $mol_type_enforce<
+	type $mol_check_icon__checked_mol_app_demo_detail_1 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['readme'] >
 		,
 		ReturnType< $mol_check_icon['checked'] >
 	>
-	type $mol_check_icon__hint__L9G2A8PF = $mol_type_enforce<
+	type $mol_check_icon__hint_mol_app_demo_detail_2 = $mol_type_enforce<
 		string
 		,
 		ReturnType< $mol_check_icon['hint'] >
 	>
-	type $mol_check_icon__Icon__O0KAG0JJ = $mol_type_enforce<
+	type $mol_check_icon__Icon_mol_app_demo_detail_3 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['readme_icon'] >
 		,
 		ReturnType< $mol_check_icon['Icon'] >
 	>
-	type $mol_chat__seed__4AP7RA0O = $mol_type_enforce<
+	type $mol_chat__seed_mol_app_demo_detail_4 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['chat_seed'] >
 		,
 		ReturnType< $mol_chat['seed'] >
 	>
-	type $mol_speck__value__NCZKB61B = $mol_type_enforce<
+	type $mol_speck__value_mol_app_demo_detail_5 = $mol_type_enforce<
 		string
 		,
 		ReturnType< $mol_speck['value'] >
 	>
-	type $mol_link__hint__9K0DUH66 = $mol_type_enforce<
+	type $mol_link__hint_mol_app_demo_detail_6 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['edit_hint'] >
 		,
 		ReturnType< $mol_link['hint'] >
 	>
-	type $mol_link__sub__21QF5V6E = $mol_type_enforce<
+	type $mol_link__sub_mol_app_demo_detail_7 = $mol_type_enforce<
 		readonly(any)[]
 		,
 		ReturnType< $mol_link['sub'] >
 	>
-	type $mol_link__uri__TXN7JL00 = $mol_type_enforce<
+	type $mol_link__uri_mol_app_demo_detail_8 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['edit_uri'] >
 		,
 		ReturnType< $mol_link['uri'] >
 	>
-	type $mol_link__hint__SECASUG6 = $mol_type_enforce<
+	type $mol_link__hint_mol_app_demo_detail_9 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['close_hint'] >
 		,
 		ReturnType< $mol_link['hint'] >
 	>
-	type $mol_link__sub__1E2XF6CM = $mol_type_enforce<
+	type $mol_link__sub_mol_app_demo_detail_10 = $mol_type_enforce<
 		readonly(any)[]
 		,
 		ReturnType< $mol_link['sub'] >
 	>
-	type $mol_link__arg__0FF2HNBZ = $mol_type_enforce<
+	type $mol_link__arg_mol_app_demo_detail_11 = $mol_type_enforce<
 		ReturnType< $mol_app_demo_detail['close_arg'] >
 		,
 		ReturnType< $mol_link['arg'] >
