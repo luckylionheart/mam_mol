@@ -6,6 +6,7 @@ declare class $ extends _$_ {
 declare namespace $ {
     export type $ = typeof $$;
     export class $$ extends $ {
+        static $: $;
     }
     namespace $$ {
         type $$ = $;
@@ -18,9 +19,10 @@ declare namespace $ {
 }
 
 declare namespace $ {
+    /** Creates lexer by dictionary of lexems. Lexem that started first wins. Then lexem that declared earlier wins. Use regexp capture to take parts of token. */
     class $mol_syntax2<Lexems extends {
         [name: string]: RegExp;
-    }> {
+    } = {}> {
         lexems: Lexems;
         constructor(lexems: Lexems);
         rules: Array<{

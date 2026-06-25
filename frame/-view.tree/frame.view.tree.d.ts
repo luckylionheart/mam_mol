@@ -2,16 +2,13 @@ declare namespace $ {
 
 	export class $mol_frame extends $mol_embed_native {
 		allow( ): string
-		uri( next?: string ): string
 		html( ): any
-		dom_name( ): string
 		attr( ): ({ 
-			'data': any,
-			'type': any,
+			'tabindex': ReturnType< $mol_frame['tabindex'] >,
 			'allow': ReturnType< $mol_frame['allow'] >,
 			'src': ReturnType< $mol_frame['uri'] >,
 			'srcdoc': ReturnType< $mol_frame['html'] >,
-		})  & ReturnType< $mol_embed_native['attr'] >
+		}) 
 		fullscreen( ): boolean
 		accelerometer( ): boolean
 		autoplay( ): boolean

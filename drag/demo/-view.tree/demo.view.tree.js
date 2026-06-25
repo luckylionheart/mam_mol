@@ -61,8 +61,9 @@
 			if(next !== undefined) return next;
 			return null;
 		}
-		Task_content(id){
-			const obj = new this.$.$mol_text();
+		Task_link(id){
+			const obj = new this.$.$mol_link();
+			(obj.uri) = () => ((this.task_uri(id)));
 			(obj.sub) = () => ([(this.task_title(id))]);
 			return obj;
 		}
@@ -70,7 +71,7 @@
 			const obj = new this.$.$mol_drop();
 			(obj.adopt) = (next) => ((this.transfer_adopt(next)));
 			(obj.receive) = (next) => ((this.receive_before(id, next)));
-			(obj.Sub) = () => ((this.Task_content(id)));
+			(obj.Sub) = () => ((this.Task_link(id)));
 			return obj;
 		}
 		task_count(){
@@ -111,7 +112,7 @@
 	($mol_mem(($.$mol_drag_demo.prototype), "Page"));
 	($mol_mem(($.$mol_drag_demo.prototype), "List_drop"));
 	($mol_mem_key(($.$mol_drag_demo.prototype), "receive_before"));
-	($mol_mem_key(($.$mol_drag_demo.prototype), "Task_content"));
+	($mol_mem_key(($.$mol_drag_demo.prototype), "Task_link"));
 	($mol_mem_key(($.$mol_drag_demo.prototype), "Task_drop"));
 	($mol_mem_key(($.$mol_drag_demo.prototype), "Task_row"));
 

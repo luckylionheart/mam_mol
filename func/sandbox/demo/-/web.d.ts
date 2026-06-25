@@ -6,6 +6,7 @@ declare class $ extends _$_ {
 declare namespace $ {
     export type $ = typeof $$;
     export class $$ extends $ {
+        static $: $;
     }
     namespace $$ {
         type $$ = $;
@@ -21,6 +22,14 @@ declare namespace $ {
 }
 
 declare namespace $ {
+    var $mol_dom: typeof globalThis;
+}
+
+declare namespace $ {
+    /**
+     * Sandbox for javascript code from user.
+     * @see https://sandbox.js.hyoo.ru/
+     */
     class $mol_func_sandbox {
         static blacklist: Set<Function>;
         static whitelist: WeakSet<WeakKey>;

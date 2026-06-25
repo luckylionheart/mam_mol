@@ -3,15 +3,6 @@ namespace $.$$ {
 	const {rem,px} = $mol_style_unit
 
 	$mol_style_define( $mol_drag_demo , {
-
-		Task_content: {
-			padding: $mol_gap.text,
-			color: $mol_theme.control,
-
-			':hover': {
-				background: $mol_theme.hover,
-			},
-		},
 		
 		Task_drop:{
 			'@': {

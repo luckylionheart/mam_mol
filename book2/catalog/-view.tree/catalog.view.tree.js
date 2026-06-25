@@ -51,8 +51,16 @@
 			(obj.sub) = () => ((this.menu_link_content(id)));
 			return obj;
 		}
+		menu_item_content(id){
+			return [(this.Menu_link(id))];
+		}
+		Menu_item(id){
+			const obj = new this.$.$mol_view();
+			(obj.sub) = () => ((this.menu_item_content(id)));
+			return obj;
+		}
 		menu_links(){
-			return [(this.Menu_link("0"))];
+			return [(this.Menu_item("0"))];
 		}
 		Menu_links(){
 			const obj = new this.$.$mol_list();
@@ -109,6 +117,9 @@
 		spread_ids_filtered(){
 			return [];
 		}
+		spread_current(){
+			return null;
+		}
 		menu_tools(){
 			return [];
 		}
@@ -131,6 +142,7 @@
 	($mol_mem(($.$mol_book2_catalog.prototype), "Menu_links_empty"));
 	($mol_mem_key(($.$mol_book2_catalog.prototype), "Menu_link_title"));
 	($mol_mem_key(($.$mol_book2_catalog.prototype), "Menu_link"));
+	($mol_mem_key(($.$mol_book2_catalog.prototype), "Menu_item"));
 	($mol_mem(($.$mol_book2_catalog.prototype), "Menu_links"));
 	($mol_mem(($.$mol_book2_catalog.prototype), "Menu"));
 	($mol_mem(($.$mol_book2_catalog.prototype), "Spread_close_icon"));
